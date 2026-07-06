@@ -55,6 +55,7 @@ target.build_configurations.each do |config|
   s['TARGETED_DEVICE_FAMILY']        = '1'
   s['ENABLE_BITCODE']                = 'NO'
   s['ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES'] = 'YES'
+  s['SWIFT_COMPILATION_MODE']        = 'singlefile'
 end
 
 # ── 按目录创建 group 并添加源文件 ──
