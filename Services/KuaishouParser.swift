@@ -49,9 +49,9 @@ final class KuaishouParser: BaseParser, PlatformParser {
             ?? (state["photo"] as? [String: Any])?["feeds"] as? [[String: Any]]
 
         if let item = feeds?.first {
-            parseItem(result, item)
+            parseItem(&result, item)
         } else if let detail = state["videoDetail"] as? [String: Any] {
-            parseItem(result, detail)
+            parseItem(&result, detail)
         } else {
             searchItem(&result, state)
         }
@@ -125,14 +125,14 @@ final class KuaishouParser: BaseParser, PlatformParser {
         guard let dict = obj as? [String: Any] else { return }
         if dict["main_mv_url"] != nil || dict["video_url"] != nil,
            dict["caption"] != nil || dict["user"] != nil || dict["author"] != nil {
-            parseItem(result, dict)
+            parseItem(&result, dict)
             return
         }
         for (_, v) in dict {
             if let arr = v as? [[String: Any]] {
-                for item in arr { searchItem(result, item); if !result.description.isEmpty { return } }
+                for item in arr { searchItem(&result, item); if !result.description.isEmpty { return } }
             } else {
-                searchItem(result, v); if !result.description.isEmpty { return }
+                searchItem(&result, v); if !result.description.isEmpty { return }
             }
         }
     }

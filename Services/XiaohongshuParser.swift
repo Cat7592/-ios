@@ -63,7 +63,7 @@ final class XiaohongshuParser: BaseParser, PlatformParser {
         // 查找笔记数据
         var noteData: [String: Any]?
 
-        if let noteMap = value(in: state, path: "note.noteDetailMap") as? [String: Any] {
+        if let noteMap: [String: Any] = value(in: state, path: "note.noteDetailMap") {
             for (_, detail) in noteMap {
                 if let d = detail as? [String: Any], let note = d["note"] as? [String: Any] {
                     noteData = note; break
@@ -71,7 +71,7 @@ final class XiaohongshuParser: BaseParser, PlatformParser {
             }
         }
 
-        if noteData == nil, let noteList = value(in: state, path: "note.noteList") as? [[String: Any]] {
+        if noteData == nil, let noteList: [[String: Any]] = value(in: state, path: "note.noteList") {
             noteData = noteList.first
         }
 
@@ -116,10 +116,16 @@ final class XiaohongshuParser: BaseParser, PlatformParser {
 
         // 视频
         if let video = note["video"] as? [String: Any] {
-            let vurl = (video["media"] as? [String: Any])?["stream"] as? [String: Any]
-                .flatMap { ($0["h264"] as? [[String: Any]]) ?? ($0["h265"] as? [[String: Any]]) }
-                .flatMap { $0.first?["masterUrl"] as? String }
-                ?? (video["url"] as? String) ?? ""
+            let vurl: String = {
+                if let media = video["media"] as? [String: Any],
+                   let stream = media["stream"] as? [String: Any],
+                   let h264 = (stream["h264"] as? [[String: Any]]) ?? (stream["h265"] as? [[String: Any]]),
+                   let first = h264.first,
+                   let url = first["masterUrl"] as? String {
+                    return url
+                }
+                return (video["url"] as? String) ?? ""
+            }()
 
             if !vurl.isEmpty {
                 let thumb = (video["image"] as? [String: Any])?["thumbnail"] as? [String]

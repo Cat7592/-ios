@@ -40,8 +40,8 @@ struct HomeView: View {
                     ParserResultView(result: result)
                 }
             }
-            .onChange(of: parserVM.result) { _, newVal in
-                if newVal != nil { showParser = true }
+            .onChange(of: parserVM.result?.id) { _, _ in
+                showParser = true
             }
             .onAppear { downloadVM.refresh() }
         }
