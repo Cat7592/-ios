@@ -26,6 +26,20 @@ jobs:
       - name: 🔧 Generate Xcode Project
         run: ruby scripts/create_xcodeproj.rb
 
+      - name: 🔍 Verify Project
+        run: |
+          echo "=== 项目文件列表 ==="
+          ls -la maolaoda-parser.xcodeproj/
+          echo ""
+          echo "=== xcscheme ==="
+          cat maolaoda-parser.xcodeproj/xcshareddata/xcschemes/maolaoda-parser.xcscheme
+          echo ""
+          echo "=== Swift 版本 ==="
+          swift --version
+          echo ""
+          echo "=== Xcode 版本 ==="
+          xcodebuild -version
+
       - name: 🏗️ Archive (Unsigned)
         run: |
           xcodebuild archive \
