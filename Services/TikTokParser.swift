@@ -21,7 +21,9 @@ final class TikTokParser: BaseParser, PlatformParser {
     func parse(_ url: String) async throws -> ParseResult {
         var finalURL = url
         if url.contains("vm.tiktok.com") || url.contains("vt.tiktok.com") {
-            finalURL = (try? await resolveShortURL(URL(string: url)!))?.absoluteString ?? url
+            if let shortURL = URL(string: url) {
+                finalURL = (try? await resolveShortURL(shortURL))?.absoluteString ?? url
+            }
         }
 
         guard let pageURL = URL(string: finalURL) else { throw ParseError.parseFailed("无效URL") }

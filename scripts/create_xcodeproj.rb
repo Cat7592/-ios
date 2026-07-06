@@ -56,6 +56,7 @@ target.build_configurations.each do |config|
   s['ENABLE_BITCODE']                = 'NO'
   s['ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES'] = 'YES'
   s['SWIFT_COMPILATION_MODE']        = 'singlefile'
+  s['ASSETCATALOG_COMPILER_APPICON_NAME'] = 'AppIcon'
 end
 
 # ── 按目录创建 group 并添加源文件 ──
@@ -64,6 +65,14 @@ swift_files.each do |f|
   groups[f[:group]] ||= main_group.new_group(f[:group], f[:group])
   ref = groups[f[:group]].new_file(f[:abs])
   target.source_build_phase.add_file_reference(ref)
+end
+
+# ── Assets.xcassets ──
+assets_path = File.join(BASE_DIR, 'Assets.xcassets')
+if File.directory?(assets_path)
+  assets_ref = main_group.new_file(assets_path)
+  target.add_resources([assets_ref])
+  puts "✅ Assets.xcassets 已注册"
 end
 
 # ── Info.plist ──

@@ -45,8 +45,9 @@ final class DownloadService: NSObject, ObservableObject {
 
     func saveToGallery(_ taskId: String) {
         guard let t = tasks.first(where: { $0.id == taskId }),
-              let path = t.localPath else { return }
-        UIImageWriteToSavedPhotosAlbum(UIImage(contentsOfFile: path)!, nil, nil, nil)
+              let path = t.localPath,
+              let image = UIImage(contentsOfFile: path) else { return }
+        UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil)
     }
 
     func cancel(_ taskId: String) {
