@@ -1,0 +1,91 @@
+name: Build Unsigned IPA
+
+on:
+  push:
+    branches: [main, master]
+    paths-ignore: ['**.md', '.gitignore', 'LICENSE', 'assets/**']
+  workflow_dispatch:
+
+concurrency:
+  group: build-ipa-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build Unsigned IPA
+    runs-on: macos-14
+    timeout-minutes: 30
+
+    steps:
+      # ==========================================
+      # Step 1: 检出代码
+      # ==========================================
+      - name: 📥 Checkout
+        uses: actions/checkout@v5
+
+      # ==========================================
+      # Step 2: 安装 xcodeproj gem
+      # ==========================================
+      - name: 💎 Install xcodeproj gem
+        run: gem install xcodeproj --no-document
+
+      # ==========================================
+      # Step 3: 生成 .xcodeproj + xcscheme
+      # ==========================================
+      - name: 🔧 Generate Xcode Project
+        run: ruby Scripts/create_xcodeproj.rb
+
+      # ==========================================
+      # Step 4: xcodebuild archive (无签名)
+      # ==========================================
+      - name: 🏗️ Archive (Unsigned)
+        run: |
+          xcodebuild archive \
+            -project maolaoda-parser.xcodeproj \
+            -scheme maolaoda-parser \
+            -configuration Release \
+            -archivePath build/maolaoda-parser.xcarchive \
+            -destination 'generic/platform=iOS' \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            | xcpretty || true
+
+      # ==========================================
+      # Step 5: 打包 .app → .ipa
+      # ==========================================
+      - name: 📦 Package IPA
+        run: |
+          mkdir -p Payload
+          cp -R build/maolaoda-parser.xcarchive/Products/Applications/猫老大解析助手.app Payload/
+          zip -r maolaoda-parser.ipa Payload/
+          ls -lh maolaoda-parser.ipa
+
+      # ==========================================
+      # Step 6: 上传 IPA Artifact
+      # ==========================================
+      - name: 📤 Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: maolaoda-parser-${{ github.sha }}
+          path: maolaoda-parser.ipa
+          retention-days: 90
+          compression-level: 0
+
+      # ==========================================
+      # Step 7: 构建摘要
+      # ==========================================
+      - name: 📊 Summary
+        run: |
+          echo "=========================================="
+          echo "  猫老大解析助手 - 构建成功"
+          echo "=========================================="
+          echo ""
+          echo "  Commit: ${{ github.sha }}"
+          echo "  Branch: ${{ github.ref_name }}"
+          echo ""
+          echo "  产物: maolaoda-parser.ipa (无签名)"
+          echo "  安装: TrollStore → + → 导入 IPA"
+          echo ""
+          echo "  📥 在 Actions 页面底部 Artifacts 下载"
+          echo "=========================================="
