@@ -7,7 +7,7 @@ import UIKit
 final class WebViewParser: NSObject {
     private var webView: WKWebView?
     private var window: UIWindow?
-    private var continuation: CheckedContinuation<ParseResult, Error>?
+    private var continuation: CheckedContinuation<ParseResult, any Error>?
     private let platform: PlatformType
     private let originalURL: String
 
@@ -18,7 +18,7 @@ final class WebViewParser: NSObject {
     }
 
     func parse() async throws -> ParseResult {
-        return try await withCheckedContinuation { cont in
+        return try await withCheckedThrowingContinuation { cont in
             self.continuation = cont
             let config = WKWebViewConfiguration()
             config.websiteDataStore = .nonPersistent()
